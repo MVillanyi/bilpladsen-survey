@@ -82,4 +82,118 @@
     import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "AI
+      apiKey: "AIzaSyBSXe1i7Azu9W7rGa-8OEoZLEOjW-qlmeY",
+      authDomain: "bilpladsen-survey.firebaseapp.com",
+      projectId: "bilpladsen-survey",
+      storageBucket: "bilpladsen-survey.firebasestorage.app",
+      messagingSenderId: "740534919542",
+      appId: "1:740534919542:web:10023f9f1d0389d888da57",
+      measurementId: "G-P8YCSS498E"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const labels = ["Bilbasen", "DBA", "Facebook", "Other"];
+    const counts = {
+      Bilbasen: 0,
+      DBA: 0,
+      Facebook: 0,
+      Other: 0
+    };
+
+    const ctx = document.getElementById("chart").getContext("2d");
+    const meta = document.getElementById("meta");
+    const summaryTable = document.getElementById("summaryTable");
+    const summaryBody = summaryTable.querySelector("tbody");
+    const otherList = document.getElementById("otherList");
+
+    const chart = new Chart(ctx, {
+      type: "pie",
+      data: {
+        labels,
+        datasets: [{
+          data: [0, 0, 0, 0],
+          backgroundColor: ["#0074d9", "#2ecc71", "#ff851b", "#aaaaaa"]
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: "bottom"
+          }
+        }
+      }
+    });
+
+    async function loadData() {
+      const snap = await getDocs(collection(db, "responses"));
+      const otherComments = [];
+
+      snap.forEach(doc => {
+        const data = doc.data();
+        const source = data.source;
+        if (!source) return;
+
+        if (counts[source] !== undefined) {
+          counts[source] += 1;
+        }
+
+        if (source === "Other" && data.otherComment) {
+          otherComments.push("- " + data.otherComment);
+        }
+      });
+
+      const total =
+        counts.Bilbasen +
+        counts.DBA +
+        counts.Facebook +
+        counts.Other;
+
+      if (total === 0) {
+        meta.textContent = "Ingen svar endnu.";
+        chart.data.datasets[0].data = [0, 0, 0, 0];
+        chart.update();
+        return;
+      }
+
+      // Update chart
+      chart.data.datasets[0].data = [
+        counts.Bilbasen,
+        counts.DBA,
+        counts.Facebook,
+        counts.Other
+      ];
+      chart.update();
+
+      meta.textContent = `Samlet antal svar: ${total}`;
+
+      // Build table with percentages
+      summaryBody.innerHTML = "";
+      labels.forEach((label) => {
+        const count = counts[label];
+        const pct = ((count / total) * 100).toFixed(1);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${label}</td>
+          <td>${count}</td>
+          <td>${pct} %</td>
+        `;
+        summaryBody.appendChild(tr);
+      });
+      summaryTable.style.display = "table";
+
+      // “Other” comments
+      if (otherComments.length > 0) {
+        otherList.textContent =
+          "Kommentarer til 'Andet':\n" + otherComments.join("\n");
+      } else {
+        otherList.textContent = "";
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
