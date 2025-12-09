@@ -5,9 +5,7 @@
   <title>Hvor fandt du denne bil?</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: #f4f5f7;
@@ -81,12 +79,8 @@
       text-align: center;
       min-height: 18px;
     }
-    .status.success {
-      color: #1c7c3c;
-    }
-    .status.error {
-      color: #c0392b;
-    }
+    .status.success { color: #1c7c3c; }
+    .status.error { color: #c0392b; }
     .footer-note {
       margin-top: 20px;
       font-size: 0.8rem;
@@ -109,6 +103,15 @@
       </div>
       <div class="option">
         <label><input type="radio" name="source" value="Facebook" /> Facebook</label>
+      </div>
+      <div class="option">
+        <label><input type="radio" name="source" value="AutoUncle" /> AutoUncle</label>
+      </div>
+      <div class="option">
+        <label><input type="radio" name="source" value="Biltorvet" /> Biltorvet</label>
+      </div>
+      <div class="option">
+        <label><input type="radio" name="source" value="Bilhandel" /> Bilhandel</label>
       </div>
       <div class="option">
         <label><input type="radio" name="source" value="Other" /> Andet (skriv hvad)</label>
@@ -147,7 +150,6 @@
     const otherText = document.getElementById("otherText");
     const submitBtn = document.getElementById("submitBtn");
 
-    // Show/hide "Other" textbox
     form.addEventListener("change", (e) => {
       if (e.target.name === "source") {
         if (e.target.value === "Other") {
