@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <title>Oversigt – hvor kommer køberne fra?</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f5f7;
+      margin: 0;
+      padding: 24px 12px 40px;
+    }
+    .wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 24px 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 1.6rem;
+      text-align: center;
+    }
+    #meta {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 12px;
+    }
+    canvas {
+      max-width: 100%;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 0.95rem;
+    }
+    th, td {
+      padding: 8px 6px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+    }
+    th {
+      background: #fafafa;
+    }
+    #otherList {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Hvor fandt kunderne bilen?</h1>
+    <div id="meta">Indlæser data...</div>
+    <canvas id="chart" width="400" height="400"></canvas>
+
+    <table id="summaryTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>Kilde</th>
+          <th>Antal</th>
+          <th>Andel</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div id="otherList"></div>
+  </div>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AI
