@@ -30,9 +30,7 @@
       color: #666;
       margin-bottom: 12px;
     }
-    canvas {
-      max-width: 100%;
-    }
+    canvas { max-width: 100%; }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -44,9 +42,7 @@
       border-bottom: 1px solid #eee;
       text-align: left;
     }
-    th {
-      background: #fafafa;
-    }
+    th { background: #fafafa; }
     #otherList {
       margin-top: 20px;
       font-size: 0.9rem;
@@ -74,7 +70,6 @@
     <div id="otherList"></div>
   </div>
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script type="module">
@@ -94,11 +89,23 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const labels = ["Bilbasen", "DBA", "Facebook", "Other"];
+    const labels = [
+      "Bilbasen",
+      "DBA",
+      "Facebook",
+      "AutoUncle",
+      "Biltorvet",
+      "Bilhandel",
+      "Other"
+    ];
+
     const counts = {
       Bilbasen: 0,
       DBA: 0,
       Facebook: 0,
+      AutoUncle: 0,
+      Biltorvet: 0,
+      Bilhandel: 0,
       Other: 0
     };
 
@@ -113,16 +120,22 @@
       data: {
         labels,
         datasets: [{
-          data: [0, 0, 0, 0],
-          backgroundColor: ["#0074d9", "#2ecc71", "#ff851b", "#aaaaaa"]
+          data: [0, 0, 0, 0, 0, 0, 0],
+          backgroundColor: [
+            "#0074d9", // Bilbasen
+            "#2ecc71", // DBA
+            "#ff851b", // Facebook
+            "#8e44ad", // AutoUncle
+            "#e67e22", // Biltorvet
+            "#16a085", // Bilhandel
+            "#aaaaaa"  // Other
+          ]
         }]
       },
       options: {
         responsive: true,
         plugins: {
-          legend: {
-            position: "bottom"
-          }
+          legend: { position: "bottom" }
         }
       }
     });
@@ -145,35 +158,24 @@
         }
       });
 
-      const total =
-        counts.Bilbasen +
-        counts.DBA +
-        counts.Facebook +
-        counts.Other;
+      const total = Object.values(counts).reduce((sum, v) => sum + v, 0);
 
       if (total === 0) {
         meta.textContent = "Ingen svar endnu.";
-        chart.data.datasets[0].data = [0, 0, 0, 0];
+        chart.data.datasets[0].data = new Array(labels.length).fill(0);
         chart.update();
         return;
       }
 
-      // Update chart
-      chart.data.datasets[0].data = [
-        counts.Bilbasen,
-        counts.DBA,
-        counts.Facebook,
-        counts.Other
-      ];
+      chart.data.datasets[0].data = labels.map(label => counts[label] || 0);
       chart.update();
 
       meta.textContent = `Samlet antal svar: ${total}`;
 
-      // Build table with percentages
       summaryBody.innerHTML = "";
-      labels.forEach((label) => {
+      labels.forEach(label => {
         const count = counts[label];
-        const pct = ((count / total) * 100).toFixed(1);
+        const pct = total > 0 ? ((count / total) * 100).toFixed(1) : "0.0";
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${label}</td>
@@ -184,7 +186,6 @@
       });
       summaryTable.style.display = "table";
 
-      // “Other” comments
       if (otherComments.length > 0) {
         otherList.textContent =
           "Kommentarer til 'Andet':\n" + otherComments.join("\n");
