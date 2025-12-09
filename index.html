@@ -88,3 +88,114 @@
       color: #c0392b;
     }
     .footer-note {
+      margin-top: 20px;
+      font-size: 0.8rem;
+      color: #999;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Hvor fandt du denne bil?</h1>
+    <p class="subtitle">Hjælp os med at se, hvilke platforme der virker bedst.</p>
+
+    <form id="surveyForm">
+      <div class="option">
+        <label><input type="radio" name="source" value="Bilbasen" required /> Bilbasen</label>
+      </div>
+      <div class="option">
+        <label><input type="radio" name="source" value="DBA" /> DBA</label>
+      </div>
+      <div class="option">
+        <label><input type="radio" name="source" value="Facebook" /> Facebook</label>
+      </div>
+      <div class="option">
+        <label><input type="radio" name="source" value="Other" /> Andet (skriv hvad)</label>
+        <textarea id="otherText" placeholder="Fx Mobile.de, ven, direkte kontakt, osv." style="display:none;"></textarea>
+      </div>
+
+      <button type="submit" id="submitBtn">Send svar</button>
+    </form>
+
+    <p id="status" class="status"></p>
+
+    <p class="footer-note">
+      Siden kan bare stå åben – vælg svar for hver kunde.
+    </p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBSXe1i7Azu9W7rGa-8OEoZLEOjW-qlmeY",
+      authDomain: "bilpladsen-survey.firebaseapp.com",
+      projectId: "bilpladsen-survey",
+      storageBucket: "bilpladsen-survey.firebasestorage.app",
+      messagingSenderId: "740534919542",
+      appId: "1:740534919542:web:10023f9f1d0389d888da57",
+      measurementId: "G-P8YCSS498E"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const form = document.getElementById("surveyForm");
+    const statusEl = document.getElementById("status");
+    const otherText = document.getElementById("otherText");
+    const submitBtn = document.getElementById("submitBtn");
+
+    // Show/hide "Other" textbox
+    form.addEventListener("change", (e) => {
+      if (e.target.name === "source") {
+        if (e.target.value === "Other") {
+          otherText.style.display = "block";
+        } else {
+          otherText.style.display = "none";
+          otherText.value = "";
+        }
+      }
+    });
+
+    function showStatus(message, type) {
+      statusEl.textContent = message;
+      statusEl.className = "status " + (type || "");
+      if (type === "success") {
+        setTimeout(() => {
+          statusEl.textContent = "";
+          statusEl.className = "status";
+        }, 2500);
+      }
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      showStatus("Gemmer svar...", "");
+
+      const formData = new FormData(form);
+      const source = formData.get("source");
+      const otherComment = source === "Other" ? otherText.value.trim() : "";
+
+      try {
+        await addDoc(collection(db, "responses"), {
+          source,
+          otherComment,
+          createdAt: serverTimestamp()
+        });
+
+        showStatus("Tak! Svaret er registreret ✅", "success");
+        form.reset();
+        otherText.style.display = "none";
+      } catch (err) {
+        console.error(err);
+        showStatus("Der skete en fejl. Prøv igen.", "error");
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
